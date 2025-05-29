@@ -9,6 +9,7 @@ on:
       - main
 
 env:
+  MLFLOW_TRACKING_URI: http://127.0.0.1:5000/
   CSV_URL: "data_preprocessing/X_train.csv"
 
 jobs:
@@ -39,7 +40,7 @@ jobs:
       # Run as a mlflow project
       - name: Run mlflow project
         run: |
-          mlflow run MLproject --env-manager=local
+          python MLproject/modelling.py
 
       # Save models to GitHub Repository
       - name: Save mlruns to repo
