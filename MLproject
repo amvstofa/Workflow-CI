@@ -1,0 +1,12 @@
+name: Category-Obesity
+
+conda_env: conda.yaml
+
+entry_points:
+  main:
+    parameters:
+      C: {type: float, default: 1.0}
+      kernel: {type: string, default: "rbf"}
+      gamma: {type: string, default: "scale"}  
+      dataset: {type: string, default: "train.csv"}
+    command: "python modelling.py {C} {kernel} {gamma} {dataset}"
