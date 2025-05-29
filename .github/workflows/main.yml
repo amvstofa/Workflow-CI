@@ -8,45 +8,37 @@ on:
     branches:
       - main
 
-env:
-  MLFLOW_TRACKING_URI: http://127.0.0.1:5000/
-  CSV_URL: "data_preprocessing/X_train.csv"
-
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE
       - uses: actions/checkout@v3
 
-      # Setup Python 3.12.7
       - name: Set up Python 3.12.7
         uses: actions/setup-python@v4
         with:
           python-version: "3.12.7"
-      
-      # Check Env Variables
-      - name: Check Env
-        run: |
-          echo $CSV_URL
 
-      # Install mlflow
+      - name: Check CSV file presence
+        run: ls -la data_preprocessing/
+
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install mlflow
+          pip install mlflow pandas scikit-learn
 
-      # Run as a mlflow project
       - name: Run mlflow project
-        run: |
-          python MLproject/modelling.py
+        env:
+           MLFLOW_TRACKING_URI: http://127.0.0.1:5000/
+        run: python MLproject/modelling.py
 
-      # Save models to GitHub Repository
-      - name: Save mlruns to repo
+      # Optional: commit mlruns (tidak direkomendasikan)
+      - name: Commit mlruns folder
+        if: false  # ubah ke true kalau ingin aktifkan
         run: |
-          git config --global user.name ${{ secrets.USERNAME }}
-          git config --global user.email ${{ secrets.EMAIL }}
+          git config --global user.name "${{ secrets.USERNAME }}"
+          git config --global user.email "${{ secrets.EMAIL }}"
           git add mlruns/
           git commit -m "Save mlruns from CI run"
-          git push origin master
+          git push origin main
