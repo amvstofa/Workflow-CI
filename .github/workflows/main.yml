@@ -1,0 +1,57 @@
+name: CI - Train SVM Model
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+env:
+  CSV_URL: "data_preprocessing/X_train.csv"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE
+      - uses: actions/checkout@v3
+
+      # Setup Python 3.12.7
+      - name: Set up Python 3.12.7
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.12.7"
+      
+      # Check Env Variables
+      - name: Check Env
+        run: |
+          echo $CSV_URL
+
+      # Install mlflow
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install mlflow
+
+      # Run as a mlflow project
+      - name: Run mlflow project
+        run: |
+          python MLproject/modelling.py
+
+      # Save models to GitHub Repository
+      - name: Save mlruns to repo
+        run: |
+          git config --global user.name ${{ secrets.USERNAME }}
+          git config --global user.email ${{ secrets.EMAIL }}
+          git add mlruns/
+          git commit -m "Save mlruns from CI run"
+          git push origin master
+
+      # Get latest MLflow run_id
+      - name: Get latest MLflow run_id
+        run: |
+          echo "Last MLflow Run ID:"
+          cat last_run_id.txt
