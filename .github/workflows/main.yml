@@ -31,7 +31,7 @@ jobs:
       - name: Run mlflow project
         env:
            MLFLOW_TRACKING_URI: http://127.0.0.1:5000/
-        run: python MLproject/modelling.py
+        run: python modelling.py
 
       # Optional: commit mlruns (tidak direkomendasikan)
       - name: Commit mlruns folder
