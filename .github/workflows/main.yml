@@ -37,9 +37,9 @@ jobs:
           pip install mlflow
 
       # Run as a mlflow project
-      - name: Run modelling.py
+      - name: Run mlflow project
         run: |
-          python ./MLproject/modelling.py
+          mlflow models serve -m runs:/eee0993d160d492eb97fa8a3529e9423/model -p 5000 --env-manager local
 
       # Save models to GitHub Repository
       - name: Save mlruns to repo
