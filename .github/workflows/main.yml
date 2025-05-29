@@ -49,9 +49,3 @@ jobs:
           git add mlruns/
           git commit -m "Save mlruns from CI run"
           git push origin master
-
-      # Get latest MLflow run_id
-      - name: Get latest MLflow run_id
-        run: |
-          echo "Last MLflow Run ID:"
-          cat last_run_id.txt
