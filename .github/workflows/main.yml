@@ -23,6 +23,12 @@ jobs:
       - name: Check CSV file presence
         run: ls -la data_preprocessing/
 
+      - name: Start MLflow server
+        run: |
+          nohup mlflow server --backend-store-uri sqlite:///mlflow.db --default-artifact-root ./mlruns/ --host 127.0.0.1 --port 5000 &
+        env:
+          MLFLOW_TRACKING_URI: http://127.0.0.1:5000/
+
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
