@@ -23,7 +23,7 @@ jobs:
         with:
           python-version: "3.12.7"
 
-      - name: Check Environment Variables
+      - name: Check Env
         run: |
           echo "MLFLOW_TRACKING_USERNAME is set: ${{ secrets.MLFLOW_TRACKING_USERNAME != '' }}"
           echo "MLFLOW_TRACKING_PASSWORD is set: ${{ secrets.MLFLOW_TRACKING_PASSWORD != '' }}"
@@ -36,9 +36,15 @@ jobs:
         run: |
           mlflow run MLproject --env-manager=local
 
-      - name: Get latest MLflow run ID
+      - name: Get latest MLflow run_id
         run: |
-          echo "Using default experiment (ID 0)..."
-          RUN_ID=$(mlflow runs list --experiment-id 0 --order-by start_time DESC | awk 'NR==2 {print $1}')
-          echo "Latest run ID: $RUN_ID"
-          echo "RUN_ID=$RUN_ID" >> $GITHUB_ENV
+          echo "Getting latest run ID..."
+          python <<EOF
+          import mlflow
+          client = mlflow.tracking.MlflowClient()
+          runs = client.search_runs(experiment_ids=["0"], order_by=["start_time DESC"]) 
+          run_id = runs[0].info.run_id
+          print(f"Latest run ID: {run_id}")
+          with open("${{ github.env }}", "a") as f:
+              f.write(f"RUN_ID={run_id}\n")
+          EOF
