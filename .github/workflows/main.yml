@@ -38,6 +38,7 @@ jobs:
 
       - name: Get latest MLflow run ID
         run: |
-          echo "Fetching latest MLflow run ID..."
-          RUN_ID=$(mlflow runs list -n "Obesity Modeling - Hyperparameter Tuning SVM" | awk 'NR==2 {print $1}')
+          echo "Using default experiment (ID 0)..."
+          RUN_ID=$(mlflow runs list --experiment-id 0 --order-by start_time DESC | awk 'NR==2 {print $1}')
           echo "Latest run ID: $RUN_ID"
+          echo "RUN_ID=$RUN_ID" >> $GITHUB_ENV
