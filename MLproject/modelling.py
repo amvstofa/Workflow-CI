@@ -1,6 +1,5 @@
 import argparse
 import os
-from dotenv import load_dotenv
 import mlflow
 import mlflow.sklearn
 import pandas as pd
@@ -8,20 +7,23 @@ from sklearn.svm import SVC
 import numpy as np
 
 def main(data_dir):
-    # Load .env dan autentikasi
-    load_dotenv()
-    username = os.getenv("MLFLOW_TRACKING_USERNAME")
-    password = os.getenv("MLFLOW_TRACKING_PASSWORD")
+    mlflow_tracking_uri = os.getenv("MLFLOW_TRACKING_URI")
+    mlflow_username     = os.getenv("MLFLOW_TRACKING_USERNAME")
+    mlflow_password     = os.getenv("MLFLOW_TRACKING_PASSWORD")
 
-    if not username or not password:
-        raise EnvironmentError("MLFLOW_TRACKING_USERNAME dan MLFLOW_TRACKING_PASSWORD harus di-set sebagai environment variable")
+    if not mlflow_tracking_uri or not mlflow_username or not mlflow_password:
+        raise EnvironmentError("MLFLOW_TRACKING_URI, MLFLOW_TRACKING_USERNAME, dan MLFLOW_TRACKING_PASSWORD harus di-set sebagai environment variable")
 
-    os.environ["MLFLOW_TRACKING_USERNAME"] = username
-    os.environ["MLFLOW_TRACKING_PASSWORD"] = password
+    # Set environment variables untuk autentikasi MLflow
+    os.environ["MLFLOW_TRACKING_USERNAME"] = mlflow_username
+    os.environ["MLFLOW_TRACKING_PASSWORD"] = mlflow_password
 
-    # MLflow tracking ke DagsHub
-    mlflow.set_tracking_uri("https://dagshub.com/amvstofa/Membangun-model.mlflow")
+    # Set tracking URI dan experiment
+    mlflow.set_tracking_uri(mlflow_tracking_uri)
     mlflow.set_experiment("Obesity Modeling - Hyperparameter Tuning SVM")
+
+    # Aktifkan autolog MLflow untuk sklearn
+    mlflow.sklearn.autolog()
 
     # Load data
     X_train = pd.read_csv(os.path.join(data_dir, "X_train.csv"))
@@ -44,14 +46,12 @@ def main(data_dir):
             for gamma in gamma_range:
                 run_name = f"SVC_C{C}_kernel{kernel}_gamma{gamma}"
                 with mlflow.start_run(run_name=run_name):
-                    mlflow.sklearn.autolog()
-                    
-                    model = SVC(C=C, kernel=kernel, gamma=gamma, random_state=42)
+                    model = SVC(C=C, kernel=kernel, gamma=gamma)
                     model.fit(X_train, y_train)
-                    
+
                     accuracy = model.score(X_test, y_test)
                     mlflow.log_metric("accuracy", accuracy)
-                    
+
                     if accuracy > best_accuracy:
                         best_accuracy = accuracy
                         best_params = {"C": C, "kernel": kernel, "gamma": gamma}
