@@ -49,16 +49,15 @@ jobs:
               f.write(f"RUN_ID={run_id}\n")
           EOF
 
-          # Download trained model artifacts from Dagshub
-      - name: Download model artifacts
+      - name: Download model artifacts from DagsHub
         run: |
           echo "Downloading model artifact for run: $RUN_ID"
-          mlflow artifacts download --run-id $RUN_ID --artifact-path best_model -d ./downloaded
-          mv ./downloaded/best_model ./best_model
-      # Build a Docker image from the trained MLflow model
+          mlflow artifacts download --run-id $RUN_ID --artifact-path model -d ./downloaded
+          mv ./downloaded/model ./best_model
+
       - name: Build Docker Model
         run: |
-          mlflow models build-docker --model-uri ./best_model --name parinduri/obesity-model 
+          mlflow models build-docker --model-uri ./best_model --name obesity-model 
 
       - name: Log in to Docker Hub
         uses: docker/login-action@v2
@@ -68,8 +67,9 @@ jobs:
           
       - name: Tag Docker Image
         run: |
-          docker tag parinduri/obesity-model parinduri/obesity-model:latest
+          docker tag obesity-model ${{ secrets.DOCKER_USERNAME }}/obesity-model:latest
+          
 
       - name: Push Docker Image
         run: |
-          docker push parinduri/obesity-model:latest
+          docker push ${{ secrets.DOCKER_USERNAME }}/obesity-model:latest
